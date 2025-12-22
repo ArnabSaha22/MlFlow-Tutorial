@@ -12,22 +12,20 @@ dagshub.init(repo_owner='ArnabSaha22', repo_name='MlFlow-Tutorial', mlflow=True)
 
 mlflow.set_tracking_uri('https://dagshub.com/ArnabSaha22/MlFlow-Tutorial.mlflow')
 
-#mlflow.set_tracking_uri("http://127.0.0.1:5000/")
-
 #Load Wine dataset
 wine=load_wine()
 X=wine.data
 y=wine.target
 
-#Train test split
-X_train, X_test, y_train, y_test=train_test_split(X, y, test_size=0.1, random_state=42)
+X_train, X_test, y_train, y_test=train_test_split(X, y, test_size=0.2, random_state=42)
 
 #Define the params for RF model
 max_depth=10
 n_estimators=5
 
 #Mention your experiment below
-mlflow.set_experiment('YT-MLOps-Exp2')
+mlflow.autolog()
+mlflow.set_experiment('YT-MLOps-Exp_Log')
 
 
 with mlflow.start_run():
@@ -35,29 +33,19 @@ with mlflow.start_run():
     rf.fit(X_train, y_train)
     y_pred=rf.predict(X_test)
     accuracy=accuracy_score(y_test, y_pred)
-    mlflow.log_metric('accuracy', accuracy)
-    mlflow.log_param('max_depth', max_depth)
-    mlflow.log_param('n_estimators', n_estimators)
 
-    #Creating a confusion matrix plot
     cm=confusion_matrix(y_test, y_pred)
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(6,6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=wine.target_names, yticklabels=wine.target_names)
     plt.ylabel('Actual')
-    plt.xlabel("Predicted")
+    plt.xlabel('Predicted')
     plt.title("Confusion Matrix")
-    
+
     #Save Plot locally
     plt.savefig("confusion-matrix.png")
 
     #Log artefacts using  mlflow
-    mlflow.log_artifact("confusion-matrix.png")
     mlflow.log_artifact(__file__)
 
-    #tags
     mlflow.set_tags({"Author":"Arnab", "Project": "Wine Classification"})
-
-    #Log the model
-    mlflow.sklearn.log_model(rf, "Random-Forest-Model")
-
     print(accuracy)
