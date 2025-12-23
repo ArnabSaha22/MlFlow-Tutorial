@@ -5,11 +5,6 @@ from sklearn.datasets import load_breast_cancer
 import pandas as pd
 import mlflow
 
-import dagshub
-dagshub.init(repo_owner='ArnabSaha22', repo_name='MlFlow-Tutorial', mlflow=True)
-
-mlflow.set_tracking_uri('https://dagshub.com/ArnabSaha22/MlFlow-Tutorial.mlflow')
-
 data=load_breast_cancer()
 X=pd.DataFrame(data.data, columns=data.feature_names)
 y=pd.Series(data.target, name='target')
@@ -39,12 +34,6 @@ mlflow.set_experiment('breast-cancer-rf-hp')
 
 with mlflow.start_run():
     grid_search.fit(X_train, y_train)
-
-    for i in range(len(grid_search.cv_results_['params'])):
-
-        with mlflow.start_run(nested=True) as child:
-            mlflow.log_params(grid_search.cv_results_['params'][i])
-            mlflow.log_metric("accuracy", grid_search.cv_results_['mean_test_score'][i])
 
     best_params=grid_search.best_params_
     best_score=grid_search.best_score_
